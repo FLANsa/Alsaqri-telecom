@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}ملخص المخزون{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>ملخص المخزون</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">إجمالي الهواتف</h5>
+                                <h2>{{ total_phones }}</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">إجمالي القيمة الشرائية</h5>
+                                <h2>{{ "%.2f"|format(total_purchase_value) }} ريال</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">إجمالي القيمة البيعية</h5>
+                                <h2>{{ "%.2f"|format(total_selling_value) }} ريال</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">إجمالي الربح المتوقع</h5>
+                                <h2>{{ "%.2f"|format(total_profit) }} ريال</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title">الهواتف الجديدة</h5>
+                                <p class="mb-1">العدد: {{ new_phones_count }}</p>
+                                <p class="mb-1">القيمة الشرائية: {{ "%.2f"|format(new_phones_purchase_value) }} ريال</p>
+                                <p class="mb-1">القيمة البيعية: {{ "%.2f"|format(new_phones_selling_value) }} ريال</p>
+                                <p class="mb-0"><strong>الربح المتوقع: {{ "%.2f"|format(new_phones_profit) }} ريال</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title">الهواتف المستعملة</h5>
+                                <p class="mb-1">العدد: {{ used_phones_count }}</p>
+                                <p class="mb-1">القيمة الشرائية: {{ "%.2f"|format(used_phones_purchase_value) }} ريال</p>
+                                <p class="mb-1">القيمة البيعية: {{ "%.2f"|format(used_phones_selling_value) }} ريال</p>
+                                <p class="mb-0"><strong>الربح المتوقع: {{ "%.2f"|format(used_phones_profit) }} ريال</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>تفاصيل المخزون حسب نوع الجوال</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>نوع الجوال</th>
+                                <th>عدد الهواتف</th>
+                                <th>القيمة الشرائية</th>
+                                <th>القيمة البيعية</th>
+                                <th>الربح المتوقع</th>
+                                <th>متوسط السعر</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for phone_type in phone_type_summary %}
+                            <tr>
+                                <td>{% if phone_type.condition == 'new' %}هواتف جديدة{% else %}هواتف مستعملة{% endif %}</td>
+                                <td>{{ phone_type.total_phones }}</td>
+                                <td>{{ "%.2f"|format(phone_type.total_purchase_value) }} ريال</td>
+                                <td>{{ "%.2f"|format(phone_type.total_selling_value) }} ريال</td>
+                                <td>{{ "%.2f"|format(phone_type.total_selling_value - phone_type.total_purchase_value) }} ريال</td>
+                                <td>{{ "%.2f"|format(phone_type.average_price) }} ريال</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- الهواتف الجديدة حسب الشركة المصنعة -->
+        {% if new_phones_brand_summary %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3>الهواتف الجديدة حسب الشركة المصنعة</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>الشركة المصنعة</th>
+                                <th>نوع الهاتف</th>
+                                <th>عدد الهواتف</th>
+                                <th>القيمة الشرائية</th>
+                                <th>القيمة البيعية</th>
+                                <th>الربح المتوقع</th>
+                                <th>متوسط السعر</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for brand in new_phones_brand_summary %}
+                            <tr>
+                                <td>{{ brand.brand }}</td>
+                                <td>{{ brand.model }}</td>
+                                <td>{{ brand.total_phones }}</td>
+                                <td>{{ "%.2f"|format(brand.total_purchase_value) }} ريال</td>
+                                <td>{{ "%.2f"|format(brand.total_selling_value) }} ريال</td>
+                                <td>{{ "%.2f"|format(brand.total_selling_value - brand.total_purchase_value) }} ريال</td>
+                                <td>{{ "%.2f"|format(brand.average_price) }} ريال</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- الهواتف المستعملة حسب الشركة المصنعة -->
+        {% if used_phones_brand_summary %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3>الهواتف المستعملة حسب الشركة المصنعة</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>الشركة المصنعة</th>
+                                <th>نوع الهاتف</th>
+                                <th>عدد الهواتف</th>
+                                <th>القيمة الشرائية</th>
+                                <th>القيمة البيعية</th>
+                                <th>الربح المتوقع</th>
+                                <th>متوسط السعر</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for brand in used_phones_brand_summary %}
+                            <tr>
+                                <td>{{ brand.brand }}</td>
+                                <td>{{ brand.model }}</td>
+                                <td>{{ brand.total_phones }}</td>
+                                <td>{{ "%.2f"|format(brand.total_purchase_value) }} ريال</td>
+                                <td>{{ "%.2f"|format(brand.total_selling_value) }} ريال</td>
+                                <td>{{ "%.2f"|format(brand.total_selling_value - brand.total_purchase_value) }} ريال</td>
+                                <td>{{ "%.2f"|format(brand.average_price) }} ريال</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

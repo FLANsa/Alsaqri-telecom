@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+
+{% block title %}إنشاء عملية بيع جديدة{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-shopping-cart"></i> إنشاء عملية بيع جديدة</h2>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> العودة للوحة التحكم
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Customer Information -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-user"></i> معلومات العميل</h5>
+                </div>
+                <div class="card-body">
+                    <form id="customerForm">
+                        <div class="mb-3">
+                            <label for="customer_name" class="form-label">اسم العميل</label>
+                            <input type="text" class="form-control" id="customer_name" name="customer_name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="customer_phone" class="form-label">رقم الهاتف</label>
+                            <input type="tel" class="form-control" id="customer_phone" name="customer_phone">
+                        </div>
+                        <div class="mb-3">
+                            <label for="customer_email" class="form-label">البريد الإلكتروني</label>
+                            <input type="email" class="form-control" id="customer_email" name="customer_email">
+                        </div>
+                        <div class="mb-3">
+                            <label for="customer_address" class="form-label">العنوان</label>
+                            <textarea class="form-control" id="customer_address" name="customer_address" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="payment_method" class="form-label">طريقة الدفع</label>
+                            <select class="form-select" id="payment_method" name="payment_method">
+                                <option value="نقدي">نقدي</option>
+                                <option value="بطاقة ائتمان">بطاقة ائتمان</option>
+                                <option value="تحويل بنكي">تحويل بنكي</option>
+                                <option value="شيك">شيك</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">ملاحظات</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Selection -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-box"></i> إضافة المنتجات</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Product Type Selection -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="product_type" class="form-label">نوع المنتج</label>
+                            <select class="form-select" id="product_type" onchange="loadProducts()">
+                                <option value="">اختر نوع المنتج</option>
+                                <option value="phone">هاتف</option>
+                                <option value="accessory">إكسسوار</option>
+                                <option value="charger">شاحن</option>
+                                <option value="case">غلاف</option>
+                                <option value="screen_protector">حماية الشاشة</option>
+                                <option value="other">أخرى</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="product_select" class="form-label">المنتج</label>
+                            <select class="form-select" id="product_select" onchange="updateProductInfo()">
+                                <option value="">اختر المنتج</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="quantity" class="form-label">الكمية</label>
+                            <input type="number" class="form-control" id="quantity" value="1" min="1" onchange="updateTotalPrice()">
+                        </div>
+                    </div>
+
+                    <!-- Product Details -->
+                    <div id="product_details" class="mb-3" style="display: none;">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>اسم المنتج:</strong> <span id="selected_product_name">-</span></p>
+                                        <p><strong>الوصف:</strong> <span id="selected_product_description">-</span></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>السعر:</strong> <span id="selected_product_price">-</span> ريال</p>
+                                        <p><strong>السعر الإجمالي:</strong> <span id="total_price" class="text-success fw-bold">-</span> ريال</p>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-primary" onclick="addToCart()">
+                                    <i class="fas fa-plus"></i> إضافة للسلة
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shopping Cart -->
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="fas fa-shopping-cart"></i> سلة المشتريات</h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="cart_items">
+                                <p class="text-muted text-center">لا توجد منتجات في السلة</p>
+                            </div>
+                            
+                            <!-- Cart Summary -->
+                            <div id="cart_summary" style="display: none;">
+                                <hr>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>المجموع قبل الضريبة: <span id="cart_subtotal" class="text-primary">0.00</span> ريال</h6>
+                                        <h6>مبلغ الضريبة (15%): <span id="cart_vat" class="text-warning">0.00</span> ريال</h6>
+                                        <h5>المجموع الإجمالي: <span id="cart_total" class="text-success fw-bold">0.00</span> ريال</h5>
+                                    </div>
+                                    <div class="col-md-6 text-end">
+                                        <button type="button" class="btn btn-success btn-lg" onclick="completeSale()" id="complete_sale_btn" disabled>
+                                            <i class="fas fa-check"></i> إتمام عملية البيع
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let cart = [];
+let products = {{ phones|tojson }};
+let accessories = {{ accessories|tojson }};
+
+function loadProducts() {
+    const productType = document.getElementById('product_type').value;
+    const productSelect = document.getElementById('product_select');
+    
+    // Clear previous options
+    productSelect.innerHTML = '<option value="">اختر المنتج</option>';
+    
+    if (productType === 'phone') {
+        // Load phones from inventory
+        products.forEach(phone => {
+            const option = document.createElement('option');
+            option.value = phone.id;
+            option.textContent = `${phone.brand} ${phone.model} - ${phone.serial_number}`;
+            option.setAttribute('data-price', phone.selling_price);
+            option.setAttribute('data-name', `${phone.brand} ${phone.model}`);
+            option.setAttribute('data-description', phone.description || '');
+            productSelect.appendChild(option);
+        });
+    } else {
+        // Load accessories from inventory based on category
+        const categoryMap = {
+            'accessory': 'accessory',
+            'charger': 'charger',
+            'case': 'case',
+            'screen_protector': 'screen_protector'
+        };
+        
+        const targetCategory = categoryMap[productType];
+        if (targetCategory) {
+            accessories.forEach(accessory => {
+                if (accessory.category === targetCategory && accessory.quantity_in_stock > 0) {
+                    const option = document.createElement('option');
+                    option.value = accessory.id;
+                    option.textContent = `${accessory.name} (المخزون: ${accessory.quantity_in_stock})`;
+                    option.setAttribute('data-price', accessory.selling_price);
+                    option.setAttribute('data-name', accessory.name);
+                    option.setAttribute('data-description', accessory.description || '');
+                    option.setAttribute('data-stock', accessory.quantity_in_stock);
+                    productSelect.appendChild(option);
+                }
+            });
+        }
+    }
+}
+
+function updateProductInfo() {
+    const productSelect = document.getElementById('product_select');
+    const selectedOption = productSelect.options[productSelect.selectedIndex];
+    
+    if (selectedOption.value) {
+        document.getElementById('selected_product_name').textContent = selectedOption.getAttribute('data-name');
+        document.getElementById('selected_product_description').textContent = selectedOption.getAttribute('data-description');
+        document.getElementById('selected_product_price').textContent = selectedOption.getAttribute('data-price');
+        
+        updateTotalPrice();
+        document.getElementById('product_details').style.display = 'block';
+    } else {
+        document.getElementById('product_details').style.display = 'none';
+    }
+}
+
+function updateTotalPrice() {
+    const price = parseFloat(document.getElementById('selected_product_price').textContent) || 0;
+    const quantity = parseInt(document.getElementById('quantity').value) || 1;
+    const total = price * quantity;
+    
+    document.getElementById('total_price').textContent = total.toFixed(2);
+}
+
+function addToCart() {
+    const productType = document.getElementById('product_type').value;
+    const productSelect = document.getElementById('product_select');
+    const quantity = parseInt(document.getElementById('quantity').value) || 1;
+    
+    if (!productType || !productSelect.value) {
+        alert('يرجى اختيار نوع المنتج والمنتج');
+        return;
+    }
+    
+    const selectedOption = productSelect.options[productSelect.selectedIndex];
+    const product = {
+        id: productSelect.value,
+        type: productType,
+        name: selectedOption.getAttribute('data-name'),
+        description: selectedOption.getAttribute('data-description'),
+        unitPrice: parseFloat(selectedOption.getAttribute('data-price')),
+        quantity: quantity,
+        totalPrice: parseFloat(selectedOption.getAttribute('data-price')) * quantity
+    };
+    
+    cart.push(product);
+    updateCartDisplay();
+    
+    // Reset form
+    document.getElementById('product_type').value = '';
+    document.getElementById('product_select').innerHTML = '<option value="">اختر المنتج</option>';
+    document.getElementById('quantity').value = '1';
+    document.getElementById('product_details').style.display = 'none';
+}
+
+function updateCartDisplay() {
+    const cartItems = document.getElementById('cart_items');
+    const cartSummary = document.getElementById('cart_summary');
+    
+    if (cart.length === 0) {
+        cartItems.innerHTML = '<p class="text-muted text-center">لا توجد منتجات في السلة</p>';
+        cartSummary.style.display = 'none';
+        return;
+    }
+    
+    let cartHTML = '<div class="table-responsive"><table class="table table-sm">';
+    cartHTML += '<thead><tr><th>المنتج</th><th>السعر</th><th>الكمية</th><th>المجموع</th><th>الإجراء</th></tr></thead><tbody>';
+    
+    cart.forEach((item, index) => {
+        cartHTML += `
+            <tr>
+                <td>${item.name}</td>
+                <td>${item.unitPrice.toFixed(2)} ريال</td>
+                <td>${item.quantity}</td>
+                <td>${item.totalPrice.toFixed(2)} ريال</td>
+                <td>
+                    <button class="btn btn-sm btn-danger" onclick="removeFromCart(${index})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    cartHTML += '</tbody></table></div>';
+    cartItems.innerHTML = cartHTML;
+    
+    // Update summary
+    updateCartSummary();
+    cartSummary.style.display = 'block';
+}
+
+function updateCartSummary() {
+    const subtotal = cart.reduce((sum, item) => sum + item.totalPrice, 0);
+    const vat = subtotal * 0.15; // 15% VAT
+    const total = subtotal + vat;
+    
+    document.getElementById('cart_subtotal').textContent = subtotal.toFixed(2);
+    document.getElementById('cart_vat').textContent = vat.toFixed(2);
+    document.getElementById('cart_total').textContent = total.toFixed(2);
+    
+    // Enable complete sale button if cart has items
+    document.getElementById('complete_sale_btn').disabled = cart.length === 0;
+}
+
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    updateCartDisplay();
+}
+
+function completeSale() {
+    if (cart.length === 0) {
+        alert('السلة فارغة');
+        return;
+    }
+    
+    // Get customer information (optional)
+    const customerName = document.getElementById('customer_name').value.trim();
+    const customerPhone = document.getElementById('customer_phone').value.trim();
+    
+    // Prepare sale data
+    const saleData = {
+        customer_name: customerName || 'عميل نقدي',
+        customer_phone: customerPhone || '',
+        customer_email: document.getElementById('customer_email').value,
+        customer_address: document.getElementById('customer_address').value,
+        payment_method: document.getElementById('payment_method').value,
+        notes: document.getElementById('notes').value,
+        items: cart
+    };
+    
+    // Send to server
+    fetch('/create_sale', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(saleData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('تم إنشاء عملية البيع بنجاح!');
+            window.location.href = `/sale/${data.sale_id}`;
+        } else {
+            alert('خطأ: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('حدث خطأ أثناء إنشاء عملية البيع');
+    });
+}
+</script>
+{% endblock %} 

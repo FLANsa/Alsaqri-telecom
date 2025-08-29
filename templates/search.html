@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}البحث في المخزون{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Simple Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="text-center mb-3">
+                <i class="fas fa-search text-primary"></i> البحث في المخزون
+            </h2>
+        </div>
+    </div>
+
+    <!-- Simple Search Form -->
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('search') }}">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="search_term" class="form-label">كلمة البحث</label>
+                                    <input type="text" class="form-control form-control-lg" id="search_term" name="search_term" 
+                                           value="{{ request.args.get('search_term', '') }}" 
+                                           placeholder="أدخل الباركود، الرقم التسلسلي، اسم المنتج...">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="search_type" class="form-label">نوع البحث</label>
+                                    <select class="form-select form-select-lg" id="search_type" name="search_type">
+                                        <option value="all" {% if request.args.get('search_type') == 'all' %}selected{% endif %}>الكل</option>
+                                        <option value="phones" {% if request.args.get('search_type') == 'phones' %}selected{% endif %}>الهواتف</option>
+                                        <option value="accessories" {% if request.args.get('search_type') == 'accessories' %}selected{% endif %}>الأكسسوارات</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-4">
+                                <i class="fas fa-search"></i> بحث
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Results -->
+    {% if request.args.get('search_term') %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> نتائج البحث ({{ phones|length + accessories|length }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if phones or accessories %}
+                        <!-- Phones Results -->
+                        {% if phones %}
+                        <div class="mb-4">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-mobile-alt"></i> الهواتف ({{ phones|length }})
+                            </h6>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>الباركود</th>
+                                            <th>الشركة المصنعة</th>
+                                            <th>الموديل</th>
+                                            <th>الحالة</th>
+                                            <th>سعر البيع</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for phone in phones %}
+                                        <tr>
+                                            <td>{{ phone.phone_number }}</td>
+                                            <td>{{ phone.brand }}</td>
+                                            <td>{{ phone.model }}</td>
+                                            <td>
+                                                {% if phone.condition == 'new' %}
+                                                    <span class="badge bg-success">جديد</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning">مستعمل</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ "%.2f"|format(phone.selling_price_with_vat) }} ريال</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Accessories Results -->
+                        {% if accessories %}
+                        <div class="mb-4">
+                            <h6 class="text-success mb-3">
+                                <i class="fas fa-box"></i> الأكسسوارات ({{ accessories|length }})
+                            </h6>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>الاسم</th>
+                                            <th>الفئة</th>
+                                            <th>الكمية</th>
+                                            <th>سعر البيع</th>
+                                            <th>الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for accessory in accessories %}
+                                        <tr>
+                                            <td>{{ accessory.name }}</td>
+                                            <td>{{ accessory.category }}</td>
+                                            <td>{{ accessory.quantity_in_stock }}</td>
+                                            <td>{{ "%.2f"|format(accessory.selling_price_with_vat) }} ريال</td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{{ url_for('edit_accessory', accessory_id=accessory.id) }}" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteAccessory({{ accessory.id }})">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">لا توجد نتائج</h4>
+                            <p class="text-muted">لم يتم العثور على أي نتائج تطابق معايير البحث</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function deleteAccessory(accessoryId) {
+    if (confirm('هل أنت متأكد من حذف هذا الأكسسوار؟')) {
+        fetch(`/delete_accessory/${accessoryId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('تم حذف الأكسسوار بنجاح');
+                location.reload();
+            } else {
+                alert('حدث خطأ أثناء حذف الأكسسوار: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('حدث خطأ أثناء حذف الأكسسوار');
+        });
+    }
+}
+</script>
+{% endblock %}

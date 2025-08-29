@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}إضافة هاتف جديد{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-center">إضافة هاتف جديد</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="brand" class="form-label">الشركة المصنعة</label>
+                        <select class="form-select" id="brand" name="brand" required>
+                            <option value="">اختر الشركة المصنعة</option>
+                            <option value="Apple">آبل (Apple)</option>
+                            <option value="Samsung">سامسونج (Samsung)</option>
+                            <option value="Huawei">هواوي (Huawei)</option>
+                            <option value="Xiaomi">شاومي (Xiaomi)</option>
+                            <option value="Oppo">أوبو (Oppo)</option>
+                            <option value="Vivo">فيفو (Vivo)</option>
+                            <option value="OnePlus">وان بلس (OnePlus)</option>
+                            <option value="Google">جوجل (Google)</option>
+                            <option value="Nokia">نوكيا (Nokia)</option>
+                            <option value="Motorola">موتورولا (Motorola)</option>
+                            <option value="Sony">سوني (Sony)</option>
+                            <option value="LG">إل جي (LG)</option>
+                            <option value="HTC">إتش تي سي (HTC)</option>
+                            <option value="Realme">ريلمي (Realme)</option>
+                            <option value="Infinix">إنفينكس (Infinix)</option>
+                            <option value="Tecno">تكنو (Tecno)</option>
+                            <option value="other">أخرى</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="model" class="form-label">الموديل</label>
+                        <input type="text" class="form-control" id="model" name="model" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="condition" class="form-label">الحالة</label>
+                        <select class="form-select" id="condition" name="condition" required>
+                            <option value="new">جديد</option>
+                            <option value="used">مستعمل</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="price" class="form-label">السعر (بعد الضريبة)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="price" name="price" step="0.01" required>
+                            <span class="input-group-text">ريال</span>
+                        </div>
+                        <small class="form-text text-muted">سيتم حساب السعر قبل الضريبة تلقائياً</small>
+                    </div>
+                    <div class="mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title">تفاصيل السعر</h6>
+                                <p class="mb-1">السعر قبل الضريبة: <span id="price_before_vat" class="text-primary fw-bold">0.00</span> ريال</p>
+                                <p class="mb-0">الضريبة (15%): <span id="vat_amount">0.00</span> ريال</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="quantity" class="form-label">الكمية</label>
+                        <input type="number" class="form-control" id="quantity" name="quantity" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">الوصف</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">إضافة الهاتف</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updatePriceCalculation() {
+    const finalPrice = parseFloat(document.getElementById('price').value) || 0;
+    
+    if (finalPrice > 0) {
+        // Calculate price before VAT: final_price / 1.15
+        const priceBeforeVAT = finalPrice / 1.15;
+        const vatAmount = finalPrice - priceBeforeVAT;
+        
+        document.getElementById('price_before_vat').textContent = priceBeforeVAT.toFixed(2);
+        document.getElementById('vat_amount').textContent = vatAmount.toFixed(2);
+    } else {
+        document.getElementById('price_before_vat').textContent = '0.00';
+        document.getElementById('vat_amount').textContent = '0.00';
+    }
+}
+
+// Add event listener
+document.getElementById('price').addEventListener('input', updatePriceCalculation);
+
+// Initial calculation
+updatePriceCalculation();
+</script>
+{% endblock %} 

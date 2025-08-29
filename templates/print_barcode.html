@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}طباعة الباركود{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">باركود الهاتف</h4>
+                    <div class="mb-4">
+                        <img src="{{ url_for('get_barcode', phone_number=phone.phone_number) }}" alt="Barcode" class="img-fluid">
+                    </div>
+                    <div class="mb-4">
+                        <h5>معلومات الهاتف</h5>
+                        {% if phone.condition == 'used' and phone.age %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>ملاحظة:</strong> عمر البطارية ({{ phone.age }} شهر) مشفر في الباركود
+                        </div>
+                        {% endif %}
+                        <p class="mb-1"><strong>الشركة المصنعة:</strong> {{ phone.brand }}</p>
+                        <p class="mb-1"><strong>الموديل:</strong> {{ phone.model }}</p>
+                        <p class="mb-1"><strong>رقم الهاتف:</strong> {{ phone.phone_number }}</p>
+                        <p class="mb-1"><strong>الرقم التسلسلي:</strong> {{ phone.serial_number }}</p>
+                        {% if phone.condition == 'new' %}
+                        <p class="mb-1"><strong>فترة الضمان:</strong> {{ phone.warranty }} شهر</p>
+                        {% else %}
+                        <p class="mb-1"><strong>حالة الهاتف:</strong> {{ phone.phone_condition }}</p>
+                        <p class="mb-1"><strong>عمر البطارية:</strong> {{ phone.age }} شهر</p>
+                        {% endif %}
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button onclick="window.print()" class="btn btn-primary">طباعة الباركود</button>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">العودة للوحة التحكم</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .btn, .card-title {
+        display: none;
+    }
+    .card {
+        border: none;
+    }
+    .card-body {
+        padding: 0;
+    }
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+}
+</style>
+{% endblock %} 

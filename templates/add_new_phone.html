@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+
+{% block title %}إضافة هاتف جديد{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">إضافة هاتف جديد</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('add_new_phone') }}">
+                        <div class="mb-3">
+                            <label for="barcode_input" class="form-label">الباركود (اختياري)</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="barcode_input" name="barcode_input" 
+                                       placeholder="أدخل الباركود الموجود أو اتركه فارغاً لتوليد باركود جديد" 
+                                       value="{{ barcode if barcode else '' }}">
+                                <button class="btn btn-outline-secondary" type="button" onclick="clearBarcode()">مسح</button>
+                            </div>
+                            <div class="form-text">أدخل الباركود الموجود على الهاتف أو اتركه فارغاً لتوليد باركود جديد</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="brand" class="form-label">الشركة المصنعة</label>
+                            <div class="input-group">
+                                <select class="form-select" id="brand" name="brand" required onchange="updateModelOptions()">
+                                    <option value="">اختر الشركة المصنعة</option>
+                                    {% for brand in brands.keys() %}
+                                        <option value="{{ brand }}">{{ brand }}</option>
+                                    {% endfor %}
+                                    <option value="other">أخرى</option>
+                                </select>
+                                <button class="btn btn-outline-success" type="button" onclick="addPhoneType()">
+                                    <i class="fas fa-plus"></i> إضافة
+                                </button>
+                                <button class="btn btn-outline-danger" type="button" onclick="deletePhoneType()">
+                                    <i class="fas fa-trash"></i> حذف
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="model" class="form-label">الموديل</label>
+                            <select class="form-select" id="model" name="model" required>
+                                <option value="">اختر الموديل</option>
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="purchase_price" class="form-label">سعر الشراء (بدون ضريبة)</label>
+                                    <input type="number" class="form-control" id="purchase_price" name="purchase_price" step="0.01" required>
+                                    <small class="form-text text-muted">سيتم إضافة 15% ضريبة القيمة المضافة تلقائياً</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="selling_price" class="form-label">سعر البيع (بدون ضريبة)</label>
+                                    <input type="number" class="form-control" id="selling_price" name="selling_price" step="0.01" required>
+                                    <small class="form-text text-muted">سيتم إضافة 15% ضريبة القيمة المضافة تلقائياً</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">سعر الشراء مع الضريبة</label>
+                                    <input type="text" class="form-control" id="purchase_price_with_vat" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">سعر البيع مع الضريبة</label>
+                                    <input type="text" class="form-control" id="selling_price_with_vat" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="serial_number" class="form-label">الرقم التسلسلي</label>
+                            <input type="text" class="form-control" id="serial_number" name="serial_number" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="warranty" class="form-label">فترة الضمان (بالأشهر)</label>
+                            <input type="number" class="form-control" id="warranty" name="warranty" required>
+                        </div>
+                        
+                        <h5 class="mt-4 mb-3">معلومات العميل</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="customer_name" class="form-label">اسم العميل</label>
+                                    <input type="text" class="form-control" id="customer_name" name="customer_name">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="customer_id" class="form-label">رقم الهوية / الإقامة</label>
+                                    <input type="text" class="form-control" id="customer_id" name="customer_id">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h5 class="mt-4 mb-3">مواصفات الهاتف</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="phone_color" class="form-label">لون الجوال</label>
+                                    <select class="form-select" id="phone_color" name="phone_color">
+                                        <option value="">اختر اللون</option>
+                                        <option value="أسود">أسود</option>
+                                        <option value="أبيض">أبيض</option>
+                                        <option value="أزرق">أزرق</option>
+                                        <option value="أحمر">أحمر</option>
+                                        <option value="أخضر">أخضر</option>
+                                        <option value="أصفر">أصفر</option>
+                                        <option value="رمادي">رمادي</option>
+                                        <option value="ذهبي">ذهبي</option>
+                                        <option value="فضي">فضي</option>
+                                        <option value="وردي">وردي</option>
+                                        <option value="بنفسجي">بنفسجي</option>
+                                        <option value="برتقالي">برتقالي</option>
+                                        <option value="أخرى">أخرى</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="phone_memory" class="form-label">الذاكرة</label>
+                                    <select class="form-select" id="phone_memory" name="phone_memory">
+                                        <option value="">اختر الذاكرة</option>
+                                        <option value="32GB">32GB</option>
+                                        <option value="64GB">64GB</option>
+                                        <option value="128GB">128GB</option>
+                                        <option value="256GB">256GB</option>
+                                        <option value="512GB">512GB</option>
+                                        <option value="1TB">1TB</option>
+                                        <option value="أخرى">أخرى</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="buyer_name" class="form-label">اسم المشتري</label>
+                            <input type="text" class="form-control" id="buyer_name" name="buyer_name">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">الوصف</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">إضافة الهاتف الجديد</button>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">عودة للوحة التحكم</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function clearBarcode() {
+    document.getElementById('barcode_input').value = '';
+}
+
+// Auto-focus on barcode input if it's empty
+if (!document.getElementById('barcode_input').value) {
+    document.getElementById('barcode_input').focus();
+}
+
+// VAT calculation functions
+function calculateVAT(price) {
+    return price * 0.15; // 15% VAT
+}
+
+function calculatePriceWithVAT(price) {
+    return price * 1.15; // Price + 15% VAT
+}
+
+function updateVATCalculations() {
+    const purchasePrice = parseFloat(document.getElementById('purchase_price').value) || 0;
+    const sellingPrice = parseFloat(document.getElementById('selling_price').value) || 0;
+    
+    const purchasePriceWithVAT = calculatePriceWithVAT(purchasePrice);
+    const sellingPriceWithVAT = calculatePriceWithVAT(sellingPrice);
+    
+    document.getElementById('purchase_price_with_vat').value = purchasePriceWithVAT.toFixed(2) + ' ريال';
+    document.getElementById('selling_price_with_vat').value = sellingPriceWithVAT.toFixed(2) + ' ريال';
+}
+
+// Add event listeners for price inputs
+document.getElementById('purchase_price').addEventListener('input', updateVATCalculations);
+document.getElementById('selling_price').addEventListener('input', updateVATCalculations);
+
+// Initialize VAT calculations on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateVATCalculations();
+    
+    // Add event listener for brand dropdown changes
+    const brandSelect = document.getElementById('brand');
+    if (brandSelect) {
+        brandSelect.addEventListener('change', updateModelOptions);
+    }
+});
+
+// Phone type data from backend
+let brandsData = {{ brands | tojson }};
+
+function updateModelOptions() {
+    const brandSelect = document.getElementById('brand');
+    const modelSelect = document.getElementById('model');
+    const selectedBrand = brandSelect.value;
+    
+    // Clear existing options
+    modelSelect.innerHTML = '<option value="">اختر الموديل</option>';
+    
+    if (selectedBrand && selectedBrand !== 'other' && brandsData[selectedBrand]) {
+        // Add models for selected brand
+        brandsData[selectedBrand].forEach(phoneType => {
+            const option = document.createElement('option');
+            option.value = phoneType.model;
+            option.textContent = phoneType.model;
+            if (phoneType.release_year) {
+                option.textContent += ` (${phoneType.release_year})`;
+            }
+            modelSelect.appendChild(option);
+        });
+    }
+}
+
+function addPhoneType() {
+    const brandSelect = document.getElementById('brand');
+    const selectedBrand = brandSelect.value;
+    
+    let brand;
+    if (selectedBrand && selectedBrand !== 'other') {
+        // Use existing selected brand
+        brand = selectedBrand;
+    } else {
+        // Ask for new brand
+        brand = prompt('أدخل اسم العلامة التجارية:');
+        if (!brand || brand.trim() === '') return;
+        brand = brand.trim();
+    }
+    
+    const model = prompt('أدخل اسم الموديل:');
+    if (!model || model.trim() === '') return;
+    
+    fetch('/add_phone_type_ajax', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            brand: brand,
+            model: model.trim()
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            // Refresh the dropdown data instead of reloading the page
+            refreshPhoneTypeData();
+        } else {
+            alert('خطأ: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('حدث خطأ في الاتصال: ' + error);
+    });
+}
+
+function refreshPhoneTypeData() {
+    // Fetch updated phone type data from the server
+    fetch('/get_phone_types_ajax')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update the brandsData variable
+            brandsData = data.brands;
+            
+            // Update the brand dropdown
+            const brandSelect = document.getElementById('brand');
+            const currentBrand = brandSelect.value;
+            
+            // Clear and repopulate brand dropdown
+            brandSelect.innerHTML = '<option value="">اختر العلامة التجارية</option>';
+            Object.keys(data.brands).forEach(brand => {
+                const option = document.createElement('option');
+                option.value = brand;
+                option.textContent = brand;
+                brandSelect.appendChild(option);
+            });
+            // Add "other" option
+            const otherOption = document.createElement('option');
+            otherOption.value = 'other';
+            otherOption.textContent = 'أخرى';
+            brandSelect.appendChild(otherOption);
+            
+            // Restore the previously selected brand if it still exists
+            if (currentBrand && data.brands[currentBrand]) {
+                brandSelect.value = currentBrand;
+                updateModelOptions();
+            } else {
+                // If the previously selected brand doesn't exist, update model options anyway
+                updateModelOptions();
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error refreshing phone type data:', error);
+    });
+}
+
+function deletePhoneType() {
+    const brandSelect = document.getElementById('brand');
+    const modelSelect = document.getElementById('model');
+    
+    const selectedBrand = brandSelect.value;
+    const selectedModel = modelSelect.value;
+    
+    if (!selectedBrand || selectedBrand === 'other') {
+        alert('يرجى اختيار علامة تجارية');
+        return;
+    }
+    
+    if (!selectedModel) {
+        alert('يرجى اختيار موديل');
+        return;
+    }
+    
+    // Show a more detailed confirmation
+    const confirmMessage = `هل أنت متأكد من حذف:\n\nالعلامة التجارية: ${selectedBrand}\nالموديل: ${selectedModel}\n\nهذا الإجراء لا يمكن التراجع عنه!`;
+    
+    if (confirm(confirmMessage)) {
+        fetch('/delete_phone_type_ajax', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                brand: selectedBrand,
+                model: selectedModel
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                // Refresh the dropdown data instead of reloading the page
+                refreshPhoneTypeData();
+            } else {
+                alert('خطأ: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('حدث خطأ في الاتصال: ' + error);
+        });
+    }
+}
+</script>
+{% endblock %} 

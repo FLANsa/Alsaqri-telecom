@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}مسح الباركود{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h3>مسح الباركود</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="barcode_input" class="form-label">إدخال الباركود</label>
+                            <input type="text" class="form-control" id="barcode_input" name="barcode_input" 
+                                   placeholder="أدخل الباركود الموجود" required autofocus>
+                            <div class="form-text">أدخل الباركود الموجود على الهاتف</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="phone_type" class="form-label">نوع الهاتف</label>
+                            <select class="form-select" id="phone_type" name="phone_type">
+                                <option value="new">هاتف جديد</option>
+                                <option value="used">هاتف مستعمل</option>
+                            </select>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">متابعة</button>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">عودة للوحة التحكم</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-focus on barcode input
+document.getElementById('barcode_input').focus();
+
+// Auto-submit on Enter key
+document.getElementById('barcode_input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        document.querySelector('form').submit();
+    }
+});
+</script>
+{% endblock %} 
