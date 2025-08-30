@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}نظام إدارة متجر الهواتف{% endblock %}</title>
+    <!-- Bootstrap RTL CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet" integrity="sha384-RZ0jvn5GQ/0gC1C6KdW41KtVoJLbYqLkULHJQfkQhF8EhELlmK3+qVwqi0i1zV5u" crossorigin="anonymous">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-I4qz7xE0/awDuxp1X3K0+Vrso4efLv2uE8ZgHeCXPDOxABhZ1C0xa/lhvN+8z7bb" crossorigin="anonymous"/>
+</head>
+<body>
+    {# Display flashed messages if any #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="container mt-3">
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="container my-4">
+        {% block content %}
+        <!-- Page specific content goes here -->
+        {% endblock %}
+    </div>
+
+    <!-- Bootstrap Bundle JS (with Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-gWfgW5+KrsVCeybPS/nfMiVdTyEtd6Pto7VW5wOZkHd4ST4BzIrATqkk4x9fa2iX" crossorigin="anonymous"></script>
+</body>
+</html>
