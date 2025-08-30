@@ -10,6 +10,36 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha384-I4qz7xE0/awDuxp1X3K0+Vrso4efLv2uE8ZgHeCXPDOxABhZ1C0xa/lhvN+8z7bb" crossorigin="anonymous"/>
 </head>
 <body>
+    <!-- Navigation bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <!-- Brand on the right side due to RTL layout -->
+            <a class="navbar-brand ms-auto" href="{{ url_for('index') }}">نظام إدارة متجر الهواتف</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}"><i class="fas fa-tachometer-alt"></i> لوحة التحكم</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('inventory_summary') }}"><i class="fas fa-boxes"></i> إدارة المخزون</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('create_sale_page') }}"><i class="fas fa-cash-register"></i> إدارة المبيعات</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}"><i class="fas fa-mobile-alt"></i> إدارة الهواتف</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
     {# Display flashed messages if any #}
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
